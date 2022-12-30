@@ -4,26 +4,17 @@ const inputNombre = document.querySelector('#input-nombre')
 const inputApellido = document.querySelector("#input-apellido")
 const inputEdad = document.querySelector("#input-edad")
 const inputSalario = document.querySelector("#input-salario")
-const inputAntiguedad = document.querySelector("#input-antiguedad")
-const inputDeudas = document.querySelector("#input-deudas")
 const inputCapitalPrestamo = document.querySelector("#input-capital")
 const inputCuotasPrestamo = document.querySelector("#input-cuotas")
 
-let prestamoMaximo = 0
 let valorCuotasPrestamo = 0
 let prestamoTotal = 0
 let nuevoCliente = []
 
-// Funcion de prestamo maximo
-
-function prestamoIdeal (salario, porcentaje, cuotas) {
-    prestamoMaximo = ((salario * porcentaje) / 100) * cuotas
-}
-
 // Funcion calculadora de cuotas del prestamo
 
-function calculadoraCuotasPrestamo (capital, interes, cuotas, sobretasa) {
-    valorCuotasPrestamo = ((capital + (capital*interes)) / cuotas) + (((capital + (capital * interes)) / cuotas) * sobretasa)
+function calculadoraCuotasPrestamo (capital, interes, cuotas) {
+    valorCuotasPrestamo = ((capital + (capital*interes)) / cuotas)
 }
 
 // Funcion calculadora del prestamo
@@ -32,24 +23,48 @@ function calculadoraPrestamo (cuotasPrestamo, cuotas) {
     prestamoTotal = cuotasPrestamo * cuotas
 }
 
+// Funcion para enviar informacion del prestamo a HTML
+
+const prestamoHTML = ( array ) => {
+    const contenedorDelPrestamo = document.querySelector(".informacion-prestamo")
+    let resultado = ""
+    array.forEach((ultimoObjetoDelArray) => {
+        calculadoraCuotasPrestamo(ultimoObjetoDelArray.capital, 0.65, ultimoObjetoDelArray.cuotas)
+        calculadoraPrestamo(valorCuotasPrestamo, ultimoObjetoDelArray.cuotas)
+        resultado += `
+            <div class= "informacion">
+                <p> 
+                    Resultado de su prestamo: <br>
+                    Usted solicito un prestamo de ${ultimoObjetoDelArray.capital} a abonar en ${ultimoObjetoDelArray.cuotas} mensuales y consecutivas. <br>
+                    El valor de cada cuota es de: $${valorCuotasPrestamo} y el total a abonar por el prestamo es de: $${prestamoTotal}
+                    <br>
+                    Saludos
+                </p>
+            </div>
+        `
+    })
+    contenedorDelPrestamo.innerHTML = resultado
+}
+
 // Evento onsubmit
 
 calcularPrestamo.onsubmit = ( evento ) => {
     evento.preventDefault()
-    if (inputNombre.value === '' || inputApellido.value === '' || inputEdad.value === '' || inputSalario.value === '' || inputAntiguedad.value === '' || inputDeudas.value === '' || inputCapitalPrestamo.value === '' || inputCuotasPrestamo.value === '' ) {
+    if (inputNombre.value === '' || inputApellido.value === '' || inputEdad.value === '' || inputSalario.value === '' || inputCapitalPrestamo.value === '' || inputCuotasPrestamo.value === '' ) {
         alert('Debe llenar los campos de informacion para generar el prestamo')
     } else {
         nuevoCliente.push({
             nombre: inputNombre.value,
             apellido: inputApellido.value,
-            edad: inputEdad.value,
-            salario: inputSalario.value,
-            antiguedad: inputAntiguedad.value,
-            deudas: inputDeudas.value,
-            capital: inputCapitalPrestamo.value,
-            cuotas: inputCuotasPrestamo.value
+            edad: Number(inputSalario.value),
+            salario: Number(inputSalario.value),
+            capital: Number(inputCapitalPrestamo.value),
+            cuotas: Number(inputCuotasPrestamo.value)
         })
         calcularPrestamo.reset()
+        ultimoObjetoDelArray = nuevoCliente[nuevoCliente.length - 1]
+        prestamoHTML(nuevoCliente)
+        localStorage.clear()
+        localStorage.setItem("arrayNuevoCliente", JSON.stringify(nuevoCliente))
     }
-    console.log(nuevoCliente)
 }
